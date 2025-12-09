@@ -6,7 +6,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  * Splide.js
  * Version  : 4.1.4
  * License  : MIT
- * Copyright: 2022 Naotoshi Fujita
+ * Copyright: 2025 Naotoshi Fujita
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() : typeof define === 'function' && define.amd ? define(factory) : (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Splide = factory());
@@ -569,7 +569,21 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       ownKeys(breakpoints).sort(function (n, m) {
         return isMin ? +n - +m : +m - +n;
       }).forEach(function (key) {
-        register(breakpoints[key], "(" + (isMin ? "min" : "max") + "-width:" + key + "px)");
+        register(breakpoints[key], "(" + (isMin ? "min" : "max") + "-width:" + function () {
+          var str = String(key);
+          var match = str.match(/^(\d+(\.\d+)?)([a-z%]*)$/i);
+
+          if (match) {
+            var num = parseFloat(match[1]);
+
+            var _unit = match[3] || "px";
+
+            var adjusted = isMin ? num : num - 0.02;
+            return adjusted + _unit;
+          }
+
+          return str;
+        }() + ")");
       });
       register(reducedMotion, MEDIA_PREFERS_REDUCED_MOTION);
       update();

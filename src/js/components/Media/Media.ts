@@ -1,11 +1,10 @@
-import { MEDIA_PREFERS_REDUCED_MOTION } from '../../constants/media';
-import { CREATED, DESTROYED } from '../../constants/states';
-import { EventBinder } from '../../constructors';
-import { Splide } from '../../core/Splide/Splide';
-import { BaseComponent, Components, Options } from '../../types';
-import { merge, omit, ownKeys } from '../../utils';
-import { EVENT_UPDATED } from '../../constants/events';
-
+import { MEDIA_PREFERS_REDUCED_MOTION } from "../../constants/media";
+import { CREATED, DESTROYED } from "../../constants/states";
+import { EventBinder } from "../../constructors";
+import { Splide } from "../../core/Splide/Splide";
+import { BaseComponent, Components, Options } from "../../types";
+import { merge, omit, ownKeys } from "../../utils";
+import { EVENT_UPDATED } from "../../constants/events";
 
 /**
  * The interface for the Media component.
@@ -14,8 +13,8 @@ import { EVENT_UPDATED } from '../../constants/events';
  */
 export interface MediaComponent extends BaseComponent {
   /** @internal */
-  reduce( reduced: boolean ): void;
-  set( options: Options, base?: boolean, notify?: boolean ): void;
+  reduce(reduced: boolean): void;
+  set(options: Options, base?: boolean, notify?: boolean): void;
 }
 
 /**
@@ -30,30 +29,54 @@ export interface MediaComponent extends BaseComponent {
  *
  * @return A Media component object.
  */
-export function Media( Splide: Splide, Components: Components, options: Options ): MediaComponent {
+export function Media(
+  Splide: Splide,
+  Components: Components,
+  options: Options
+): MediaComponent {
   const { state } = Splide;
-  const breakpoints   = options.breakpoints || {};
+  const breakpoints = options.breakpoints || {};
   const reducedMotion = options.reducedMotion || {};
-  const binder        = EventBinder();
+  const binder = EventBinder();
 
   /**
    * Stores options and MediaQueryList object.
    */
-  const queries: Array<[ Options, MediaQueryList ]> = [];
+  const queries: Array<[Options, MediaQueryList]> = [];
 
   /**
    * Called when the component is constructed.
    */
   function setup(): void {
-    const isMin = options.mediaQuery === 'min';
+    const isMin = options.mediaQuery === "min";
 
-    ownKeys( breakpoints )
-      .sort( ( n, m ) => isMin ? +n - +m : +m - +n )
-      .forEach( key => {
-        register( breakpoints[ key ], `(${ isMin ? 'min' : 'max' }-width:${ key }px)` );
-      } );
+    ownKeys(breakpoints)
+      .sort((n, m) => (isMin ? +n - +m : +m - +n))
+      .forEach((key) => {
+        register(
+          breakpoints[key],
+          "(" +
+            (isMin ? "min" : "max") +
+            "-width:" +
+            (() => {
+              const str = String(key);
 
-    register( reducedMotion, MEDIA_PREFERS_REDUCED_MOTION );
+              const match = str.match(/^(\d+(\.\d+)?)([a-z%]*)$/i);
+
+              if (match) {
+                const num = parseFloat(match[1]);
+                const unit = match[3] || "px";
+                const adjusted = isMin ? num : num - 0.02;
+                return adjusted + unit;
+              }
+
+              return str;
+            })() +
+            ")"
+        );
+      });
+
+    register(reducedMotion, MEDIA_PREFERS_REDUCED_MOTION);
     update();
   }
 
@@ -62,8 +85,8 @@ export function Media( Splide: Splide, Components: Components, options: Options 
    *
    * @param completely - Will be `true` for complete destruction.
    */
-  function destroy( completely: boolean ): void {
-    if ( completely ) {
+  function destroy(completely: boolean): void {
+    if (completely) {
       binder.destroy();
     }
   }
@@ -74,29 +97,29 @@ export function Media( Splide: Splide, Components: Components, options: Options 
    * @param options - Options merged to current options when the document matches the query.
    * @param query   - A query string.
    */
-  function register( options: Options, query: string ): void {
-    const queryList = matchMedia( query );
-    binder.bind( queryList, 'change', update );
-    queries.push( [ options, queryList ] );
+  function register(options: Options, query: string): void {
+    const queryList = matchMedia(query);
+    binder.bind(queryList, "change", update);
+    queries.push([options, queryList]);
   }
 
   /**
    * Checks all media queries in entries and updates options.
    */
   function update(): void {
-    const destroyed = state.is( DESTROYED );
+    const destroyed = state.is(DESTROYED);
     const direction = options.direction;
-    const merged = queries.reduce<Options>( ( merged, entry ) => {
-      return merge( merged, entry[ 1 ].matches ? entry[ 0 ] : {} );
-    }, {} );
+    const merged = queries.reduce<Options>((merged, entry) => {
+      return merge(merged, entry[1].matches ? entry[0] : {});
+    }, {});
 
-    omit( options );
-    set( merged );
+    omit(options);
+    set(merged);
 
-    if ( options.destroy ) {
-      Splide.destroy( options.destroy === 'completely' );
-    } else if ( destroyed ) {
-      destroy( true );
+    if (options.destroy) {
+      Splide.destroy(options.destroy === "completely");
+    } else if (destroyed) {
+      destroy(true);
       Splide.mount();
     } else {
       direction !== options.direction && Splide.refresh();
@@ -111,9 +134,11 @@ export function Media( Splide: Splide, Components: Components, options: Options 
    *
    * @param enable - Determines whether to apply `reducedMotion` options or not.
    */
-  function reduce( enable: boolean ): void {
-    if ( matchMedia( MEDIA_PREFERS_REDUCED_MOTION ).matches ) {
-      enable ? merge( options, reducedMotion ) : omit( options, ownKeys( reducedMotion ) );
+  function reduce(enable: boolean): void {
+    if (matchMedia(MEDIA_PREFERS_REDUCED_MOTION).matches) {
+      enable
+        ? merge(options, reducedMotion)
+        : omit(options, ownKeys(reducedMotion));
     }
   }
 
@@ -127,12 +152,12 @@ export function Media( Splide: Splide, Components: Components, options: Options 
    * @param base   - Optional. Determines whether to also update base options or not.
    * @param notify - Optional. If `true`, always emits the `update` event.
    */
-  function set( opts: Options, base?: boolean, notify?: boolean ): void {
-    merge( options, opts );
-    base && merge( Object.getPrototypeOf( options ), opts );
+  function set(opts: Options, base?: boolean, notify?: boolean): void {
+    merge(options, opts);
+    base && merge(Object.getPrototypeOf(options), opts);
 
-    if ( notify || ! state.is( CREATED ) ) {
-      Splide.emit( EVENT_UPDATED, options );
+    if (notify || !state.is(CREATED)) {
+      Splide.emit(EVENT_UPDATED, options);
     }
   }
 

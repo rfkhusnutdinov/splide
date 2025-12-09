@@ -6,7 +6,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  * Splide.js
  * Version  : 4.1.4
  * License  : MIT
- * Copyright: 2022 Naotoshi Fujita
+ * Copyright: 2025 Naotoshi Fujita
  */
 var MEDIA_PREFERS_REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 var CREATED = 1;
@@ -568,7 +568,21 @@ function Media(Splide2, Components2, options) {
     ownKeys(breakpoints).sort(function (n, m) {
       return isMin ? +n - +m : +m - +n;
     }).forEach(function (key) {
-      register(breakpoints[key], "(" + (isMin ? "min" : "max") + "-width:" + key + "px)");
+      register(breakpoints[key], "(" + (isMin ? "min" : "max") + "-width:" + function () {
+        var str = String(key);
+        var match = str.match(/^(\d+(\.\d+)?)([a-z%]*)$/i);
+
+        if (match) {
+          var num = parseFloat(match[1]);
+
+          var _unit = match[3] || "px";
+
+          var adjusted = isMin ? num : num - 0.02;
+          return adjusted + _unit;
+        }
+
+        return str;
+      }() + ")");
     });
     register(reducedMotion, MEDIA_PREFERS_REDUCED_MOTION);
     update();
@@ -3392,10 +3406,10 @@ var SplideRenderer = /*#__PURE__*/function () {
     if (gap) {
       var _this$parseCssValue3 = this.parseCssValue(gap),
           _value = _this$parseCssValue3.value,
-          _unit = _this$parseCssValue3.unit;
+          _unit2 = _this$parseCssValue3.unit;
 
       var gapOffset = (_value / perPage - _value) / 2;
-      values.push(this.buildCssValue(orient(gapOffset), _unit));
+      values.push(this.buildCssValue(orient(gapOffset), _unit2));
     }
 
     return values;
