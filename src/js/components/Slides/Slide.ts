@@ -29,7 +29,7 @@ import {
   EVENT_SLIDE_KEYDOWN,
   EVENT_VISIBLE,
 } from '../../constants/events';
-import { MOVING, SCROLLING } from '../../constants/states';
+import { MOVING, SCROLLING, DESTROYED } from '../../constants/states';
 import { FADE, LOOP } from '../../constants/types';
 import { EventInterface } from '../../constructors';
 import { Splide } from '../../core/Splide/Splide';
@@ -204,7 +204,7 @@ export function Slide( Splide: Splide, index: number, slideIndex: number, slide:
       setAttribute( slide, ARIA_HIDDEN, hidden || '' );
     }
 
-    setAttribute( queryAll( slide, options.focusableNodes || '' ), TAB_INDEX, hidden ? -1 : '' );
+    setAttribute( queryAll( slide, options.focusableNodes || '' ), TAB_INDEX, ( hidden && !Splide.state.is( [ DESTROYED ] ) ) ? -1 : '' );
 
     if ( slideFocus ) {
       setAttribute( slide, TAB_INDEX, hidden ? -1 : 0 );

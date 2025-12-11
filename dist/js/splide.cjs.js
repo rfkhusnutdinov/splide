@@ -977,7 +977,7 @@ function Slide$1(Splide2, index, slideIndex, slide) {
       setAttribute(slide, ARIA_HIDDEN, hidden || "");
     }
 
-    setAttribute(queryAll(slide, options.focusableNodes || ""), TAB_INDEX, hidden ? -1 : "");
+    setAttribute(queryAll(slide, options.focusableNodes || ""), TAB_INDEX, hidden && !Splide2.state.is([DESTROYED]) ? -1 : "");
 
     if (slideFocus) {
       setAttribute(slide, TAB_INDEX, hidden ? -1 : 0);
